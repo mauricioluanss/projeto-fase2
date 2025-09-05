@@ -23,7 +23,7 @@ def corpo_matriz(matriz) -> list[list[str]]:
 
 # retorna uma lista de dicionarios, onde cada elemento representa uma linha do csv original.
 # as chaves são os nomes das colunas e os valores são os valores das colunas.
-def cria_dicionario(
+def transforma_matriz_em_dict(
     coluna: list[str], linhas: list[list[str]]
 ) -> list[dict[str, str | float]]:
     dados_meteorologicos = []
@@ -51,16 +51,64 @@ def cria_dicionario(
         # exit()? <- devo colocar exit em cada execpet? nao quero que o prgrama continue se tiver erro
 
 
+def captura_data(msg_input, msg_erro):
+    while True:
+        data = input(f"{msg_input}: ")
+        # vou ter que colocar as validações sobre mes e ano aqui dentro <--
+
+        if data.isdigit():
+            return data
+        else:
+            print(f"{msg_erro}")
+
+
+def define_intervalo_data():
+    while True:
+        mes_inicial = captura_data(
+            "Digite o mês inicial (MM): ", "Inválido. Digite o mês no formato (MM)"
+        )
+        ano_inicial = captura_data(
+            "Digite o ano inicial (AAAA): ", "Inválido. Digite o ano no formato (AAAA)"
+        )
+        mes_final = captura_data(
+            "Digite o mês final (MM):", "Inválido. Digite o mês no formato (MM)"
+        )
+        ano_final = captura_data(
+            "Digite o ano final (AAAA): ", "Inválido. Digite o ano no formato (AAAA)"
+        )
+
+        # mover essa parte para dentro de captura data
+        if not (1 <= int(mes_inicial) <= 12) or not (1 <= int(mes_final) <= 12):
+            print("Intervalo dos meses deve estar entre 1 e 12. Tente novamente.")
+            continue
+        if int(ano_inicial) > int(ano_final):
+            print("Ano inicial maior que ano final. Tente novamente.")
+            continue
+        if int(ano_inicial) not in range(1961, 2017) or int(ano_final) not in range(
+            1961, 2017
+        ):
+            print("Ano deve estar entre 1961 e 2016. Tente novamente.")
+            continue
+        break
+    data_inicial = f"{mes_inicial}/{ano_inicial}"
+    data_final = f"{mes_final}/{ano_final}"
+
+    return data_inicial, data_final
+
+
 def main():
     caminho_arquivo = "dados_meteorologicos.csv"
-    with open(caminho_arquivo, "r") as arquivo:
-        matriz = cria_matriz(arquivo)
+    try:
+        with open(caminho_arquivo, "r") as arquivo:
+            matriz = cria_matriz(arquivo)
+    except FileNotFoundError:
+        print("Arquivo não encontrado. Verifique o caminho do arquivo.")
+        exit()
 
     cabecalho = cabecalho_matriz(matriz)
     corpo = corpo_matriz(matriz)
-    dados_meteorologicos = cria_dicionario(cabecalho, corpo)
-
-    print(dados_meteorologicos)
+    dados_meteorologicos = transforma_matriz_em_dict(cabecalho, corpo)
+    print(define_intervalo_data())  # teste pra ver como ta saindo o intervalo das data
 
 
 main()
